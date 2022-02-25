@@ -24,6 +24,7 @@ export default {
     return {
       datasets: [],
       labels: [],
+      options: {},
       isLoaded: false,
     };
   },
@@ -31,9 +32,34 @@ export default {
     await this.getData();
     this.isLoaded = true;
   },
-  computed: {
-    options() {
-      return {
+  computed: {},
+  methods: {
+    async getData() {
+      // 月ごとにリクエスト
+      const chartData = await axios
+        .get("/mock/chart/topGraph.json")
+        .then((response) => {
+          return response.data
+        })
+        .catch((error) => console.log(error));
+
+      this.datasets = [
+        {
+          label: "売上",
+          data: chartData.map((item) => {
+            return item.profit;
+          }),
+          backgroundColor: "#0EBAB6",
+          barPercentage: 0.3,
+          maxBarThickness: 30,
+        },
+      ];
+
+      this.labels = chartData.map((item) => {
+        return item.branch_name;
+      });
+
+      this.options = {
         maintainAspectRatio: false,
         responsive: true,
         scales: {
@@ -42,14 +68,7 @@ export default {
               gridLines: {
                 color: "transparent",
                 zeroLineColor: "#E6E6E6",
-                // display: false,
                 drawTicks: false,
-                // drawOnChartArea: false
-                // drawBorder: false,
-                // display: false,
-                // display: false,
-                // drawTicks: true,
-                // drawBorder: false,
               },
               ticks: {
                 beginAtZero: true,
@@ -63,24 +82,15 @@ export default {
           ],
           yAxes: [
             {
-              maxBarThickness: 30,
               gridLines: {
                 color: "transparent",
-                // zeroLineColor: "#E6E6E6",
                 drawOnChartArea: false,
-                // display: false,
-                // drawOnChartArea: false
                 drawTicks: false,
-                // display: false,
-                // drawTicks: true
               },
               ticks: {
-                callback: (value) => {
-                  if (value.length > 8) {
-                    return value.substr(0, 7) + "…";
-                  } else {
-                    return value;
-                  }
+                callback: (value, index) => {
+                  value = `${chartData[index].order}：${value}`
+                  return value.length > 8 ? value.substr(0, 7) + "…" : value
                 },
                 fontColor: "#848484",
                 padding: 15,
@@ -105,35 +115,6 @@ export default {
           mode: "label", //マウスオーバー時に表示されるtooltip
         },
       };
-    },
-  },
-  methods: {
-    async getData() {
-      // 月ごとにリクエスト
-      const chartData = await axios
-        .get("/mock/chart/topGraph.json")
-        .then((response) => {
-          // 降順にソートして返す
-          return response.data.sort((a, b) => {
-            return a.data < b.data ? 1 : -1;
-          });
-        })
-        .catch((error) => console.log(error));
-
-      this.datasets = [
-        {
-          label: "売上",
-          data: chartData.map((item) => {
-            return item.data;
-          }),
-          backgroundColor: "#0EBAB6",
-          barPercentage: 0.3,
-        },
-      ];
-
-      this.labels = chartData.map((item) => {
-        return item.name;
-      });
     },
   },
 };
