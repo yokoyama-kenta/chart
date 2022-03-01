@@ -54,6 +54,7 @@ export default {
           borderWidth: 1.5,
           pointRadius: 0,
           pointHitRadius: 10,
+          hoverRadius: 1.5,
         };
       });
 
@@ -87,6 +88,8 @@ export default {
                     : "";
                 },
                 padding: 15,
+                maxRotation: 0,
+                minRotation: 0,
               },
             },
           ],
@@ -109,7 +112,7 @@ export default {
                     ? `${value}万円`
                     : value.toLocaleString();
                 },
-                padding: 15,
+                padding: 30,
               },
             },
             {
@@ -131,9 +134,10 @@ export default {
             padding: 35,
             boxWidth: 30,
             generateLabels: () => {
-              const legends = this.datasets.map(data => {
+              const legends = this.datasets.map((data) => {
                 return {
-                  text: chartData.data.find(item => item.name === data.label).order,
+                  text: chartData.data.find((item) => item.name === data.label)
+                    .order,
                   // 凡例ボックスの塗りつぶしスタイル
                   fillStyle: data.borderColor,
                   //  trueの場合、この項目は非表示のデータセットを表します。ラベルは取り消し線を伴ってレンダリングされます
@@ -151,9 +155,9 @@ export default {
                   // 凡例ボックスのストロークスタイル
                   strokeStyle: "transparent",
                   // 凡例ボックスのポイントスタイル（usePointStyleがtrueの場合にのみ使用されます）
-                  pointStyle: ""
-                }
-              })
+                  pointStyle: "",
+                };
+              });
 
               return legends;
             },
@@ -161,10 +165,13 @@ export default {
         },
         tooltips: {
           mode: "label", //マウスオーバー時に表示されるtooltip
+          callbacks: {
+            title: (tooltipItem) => {
+              return moment(tooltipItem[0].label).format("YYYY年MM月DD日");
+            },
+          },
         },
       };
-
-
     },
   },
 };
