@@ -1,14 +1,19 @@
 <template>
   <article class="chart-item">
     <p class="pl-1">推移</p>
-    <LineChart
-      v-if="isLoaded"
-      :chartData="{
-        datasets,
-        labels,
-      }"
-      :responseData="responseData"
-    />
+    <div class="chart-wrapper">
+      <LineChart
+        class="line-chart"
+        v-if="isLoaded"
+        :chartData="{
+          datasets,
+          labels,
+        }"
+        :responseData="responseData"
+        @sendLegend="setLegend"
+      />
+      <ul class="legend" v-html="chartLegend"></ul>
+    </div>
   </article>
 </template>
 
@@ -27,6 +32,7 @@ export default {
       datasets: [],
       labels: [],
       isLoaded: false,
+      chartLegend: null,
     };
   },
   async mounted() {
@@ -61,8 +67,39 @@ export default {
         return addMonths(parse(this.responseData.start, "yyyy-MM-dd", new Date()), index)
       });
     },
+    setLegend (html) {
+      this.chartLegend = html
+    },
   },
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped>
+.chart-wrapper {
+  display: flex;
+}
+.line-chart {
+  flex-grow: 1;
+  /* height: 100%; */
+}
+.legend {
+  width: 100px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  height: 180px;
+}
+.legend ::v-deep li {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+.legend ::v-deep .border {
+  display: inline-block;
+  width: 10px;
+  height: 2px;
+  margin-right: 6px;
+}
+</style>

@@ -61,10 +61,10 @@ export default {
 }
 .top {
   width: 35%;
-  padding-right: 15px;
+  padding-right: 10px;
 }
 .transition {
   width: 65%;
-  padding-left: 15px;
+  padding-left: 10px;
 }
 </style>

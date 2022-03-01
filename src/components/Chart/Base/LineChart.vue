@@ -74,45 +74,27 @@ export default {
                       : value.toLocaleString();
                   },
                   padding: 30,
+                  stepSize: 40
                 },
               },
             ],
           },
+          legendCallback: function(chart) {
+            const template = []
+            chart.data.datasets.forEach((data, index) => {
+              template.push(`
+                <li>
+                  <span class="border" style="background-color: ${data.borderColor}"></span>
+                  <span>${index + 1}</span>
+                </li>
+              `)
+            });
+            return template.join("");
+          },
           legend: {
-            display: true,
+            display: false,
             position: "right",
-            labels: {
-              padding: 35,
-              boxWidth: 30,
-              generateLabels: () => {
-                const legends = this.chartData.datasets.map((data) => {
-                  return {
-                    text: this.responseData.data.find((item) => item.name === data.label)
-                      .order,
-                    // 凡例ボックスの塗りつぶしスタイル
-                    fillStyle: data.borderColor,
-                    //  trueの場合、この項目は非表示のデータセットを表します。ラベルは取り消し線を伴ってレンダリングされます
-                    hidden: false,
-                    // ボックス枠用。次をご覧ください。https://developer.mozilla.org/en/docs/Web/API/CanvasRenderingContext2D/lineCap
-                    lineCap: "",
-                    // ボックス枠用。次をご覧ください。https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash
-                    lineDash: [0],
-                    // ボックス枠用。次をご覧ください。https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lineDashOffset
-                    lineDashOffset: 0,
-                    // ボックス枠用。次をご覧ください。https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/lineJoin
-                    lineJoin: "bevel",
-                    // 枠線の幅
-                    lineWidth: 0,
-                    // 凡例ボックスのストロークスタイル
-                    strokeStyle: "transparent",
-                    // 凡例ボックスのポイントスタイル（usePointStyleがtrueの場合にのみ使用されます）
-                    pointStyle: "",
-                  };
-                });
-
-                return legends;
-              },
-            },
+            align: "end",
           },
           tooltips: {
             mode: "label", //マウスオーバー時に表示されるtooltip
@@ -129,6 +111,9 @@ export default {
   },
   mounted () {
     this.renderChart(this.chartData, this.options);
+
+    const legend = this.generateLegend();
+    this.$emit('sendLegend', legend);
   }
 }
 </script>
