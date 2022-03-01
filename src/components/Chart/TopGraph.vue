@@ -121,8 +121,5 @@ export default {
 </script>
 
 <style>
-.card {
-  width: 800px;
-  height: 400px;
-}
+
 </style>

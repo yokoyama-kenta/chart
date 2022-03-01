@@ -72,7 +72,7 @@ export default {
                 color: "transparent",
                 zeroLineColor: "transparent",
                 // display: false,
-                drawTicks: false,
+                // drawTicks: false,
                 // drawOnChartArea: false
                 // drawBorder: false,
                 // display: false,
@@ -96,14 +96,15 @@ export default {
           yAxes: [
             {
               gridLines: {
-                color: "transparent",
+                color: "#E6E6E6",
                 zeroLineColor: "#E6E6E6",
-                drawOnChartArea: false,
+                // drawOnChartArea: false,
                 // display: false,
                 // drawOnChartArea: false
-                drawTicks: false,
+                // drawTicks: false,
                 // display: false,
-                // drawTicks: true
+                drawBorder: false,
+                drawTicks: false
               },
               ticks: {
                 beginAtZero: true,
@@ -115,16 +116,17 @@ export default {
                 padding: 30,
               },
             },
-            {
-              gridLines: {
-                // color: "transparent",
-                zeroLineColor: "#E6E6E6",
-                drawTicks: false,
-              },
-              ticks: {
-                display: false,
-              },
-            },
+            // {
+            //   gridLines: {
+            //     color: "#E6E6E6",
+            //     zeroLineColor: "#E6E6E6",
+            //     drawTicks: false,
+            //     drawOnChartArea: false,
+            //   },
+            //   ticks: {
+            //     display: false,
+            //   },
+            // },
           ],
         },
         legend: {

@@ -14,6 +14,10 @@ export default {
       type: Object,
       default: () => {}
     },
+    height: {
+      type: Number,
+      default: 220
+    }
   },
   mounted () {
     // this.chartData is created in the mixin.
