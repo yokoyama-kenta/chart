@@ -74,7 +74,6 @@
             hoverBorderWidth: 2
           }
         })
-        console.log(chartData)
 
         this.labels = chartData[currentChartIndex].count.map((item, index) => {
           return moment(chartData[currentChartIndex].start).add(index, 'days').format('YYYY-MM-DD')

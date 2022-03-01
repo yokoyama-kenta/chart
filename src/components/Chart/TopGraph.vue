@@ -1,15 +1,15 @@
 <template>
-  <div class="card">
-    上位グラフ
+  <article class="chart-item">
+    <p class="pl-1">上位グラフ</p>
     <HorizontalBarChart
       v-if="isLoaded"
       :chartData="{
         datasets,
-        labels,
+        labels
       }"
-      :options="options"
+      :responseData="responseData"
     />
-  </div>
+  </article>
 </template>
 
 <script>
@@ -22,9 +22,9 @@ export default {
   },
   data() {
     return {
+      responseData: null,
       datasets: [],
       labels: [],
-      options: {},
       isLoaded: false,
     };
   },
@@ -35,18 +35,17 @@ export default {
   computed: {},
   methods: {
     async getData() {
-      // 月ごとにリクエスト
-      const chartData = await axios
+      this.responseData = await axios
         .get("/mock/chart/topGraph.json")
         .then((response) => {
-          return response.data
+          return response.data;
         })
         .catch((error) => console.log(error));
 
       this.datasets = [
         {
           label: "売上",
-          data: chartData.map((item) => {
+          data: this.responseData.map((item) => {
             return item.profit;
           }),
           backgroundColor: "#0EBAB6",
@@ -55,71 +54,12 @@ export default {
         },
       ];
 
-      this.labels = chartData.map((item) => {
+      this.labels = this.responseData.map((item) => {
         return item.branch_name;
       });
-
-      this.options = {
-        maintainAspectRatio: false,
-        responsive: true,
-        scales: {
-          xAxes: [
-            {
-              gridLines: {
-                color: "transparent",
-                zeroLineColor: "#E6E6E6",
-                drawTicks: false,
-              },
-              ticks: {
-                beginAtZero: true,
-                callback: (value, index) => {
-                  return index === 0 ? `${value}万円` : value.toLocaleString();
-                },
-                fontColor: "#848484",
-                padding: 10,
-              },
-            },
-          ],
-          yAxes: [
-            {
-              gridLines: {
-                color: "transparent",
-                drawOnChartArea: false,
-                drawTicks: false,
-              },
-              ticks: {
-                callback: (value, index) => {
-                  value = `${chartData[index].order}：${value}`
-                  return value.length > 8 ? value.substr(0, 7) + "…" : value
-                },
-                fontColor: "#848484",
-                padding: 15,
-              },
-            },
-            {
-              gridLines: {
-                color: "transparent",
-                zeroLineColor: "#E6E6E6",
-                drawTicks: false,
-              },
-              ticks: {
-                display: false,
-              },
-            },
-          ],
-        },
-        legend: {
-          display: false,
-        },
-        tooltips: {
-          mode: "label", //マウスオーバー時に表示されるtooltip
-        },
-      };
     },
   },
 };
 </script>
 
-<style>
-
-</style>
+<style lang="scss" scoped></style>

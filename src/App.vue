@@ -1,7 +1,16 @@
 <template>
   <div id="app">
-    <TopGraph class="topGraph" />
-    <Transition class="transition" />
+    <div class="chart">
+      <h2 class="chart-title">チャートサンプル</h2>
+    </div>
+    <ul class="chart-list">
+      <li class="chart-list__item top">
+        <TopGraph />
+      </li>
+      <li class="chart-list__item transition">
+        <Transition />
+      </li>
+    </ul>
     <DashBoard class="dashBoard" />
   </div>
 </template>
@@ -30,10 +39,32 @@ export default {
   color: #2c3e50;
   margin-top: 60px;
 }
-.topGraph {
-  margin-bottom: 100px;
+.chart {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.chart-list {
+  list-style: none;
+  margin-top: 15px;
+  display: flex;
+}
+.chart-list__item {
+
+}
+.top {
+  width: 35%;
+  padding-right: 15px;
 }
 .transition {
-  margin-bottom: 100px;
+  width: 65%;
+  padding-left: 15px;
 }
 </style>
