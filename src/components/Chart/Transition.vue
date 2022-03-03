@@ -43,7 +43,7 @@ export default {
   methods: {
     async getData() {
       this.responseData = await axios
-        .get("/mock/chart/transition.json")
+        .get("/mock/chart/transitionGraph.json")
         .then((response) => {
           return response.data;
         })
