@@ -53,13 +53,15 @@ export default {
         return {
           label: item.name,
           borderColor: item.color,
-          backgroundColor: "rgba(255,0,0,0)",
+          backgroundColor: "transparent",
+          pointBorderColor: "transparent",
           data: item.data,
           lineTension: 0,
           borderWidth: 1.5,
           pointRadius: 0,
-          pointHitRadius: 10,
-          hoverRadius: 1.5,
+          pointHitRadius: 0,
+          hoverRadius: 0, // 丸ポチのサイズ
+          pointBackgroundColor: item.color
         };
       });
 
@@ -81,6 +83,9 @@ export default {
 .line-chart {
   flex-grow: 1;
   /* height: 100%; */
+  position: relative;
+  z-index: 0;
+  background: #fff;
 }
 .legend {
   width: 100px;
