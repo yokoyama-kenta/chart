@@ -86,13 +86,13 @@ export default {
             enabled: false,
             intersect: false,
           },
-          onHover: (evt, item) => {
+          onHover: () => {
+            const chart = this.$data._chart
             const init = () => {
               // 初回実行
               if (!this.border.canvas) {
                 this.createCanvas()
 
-                const chart = this.$data._chart
                 chart.canvas.addEventListener('mouseleave', this.onLeave)
 
                 this.onLeave()
@@ -106,9 +106,7 @@ export default {
             init()
             draw()
 
-            if (item.length) {
-              this.$emit("sync", item)
-            }
+            this.$emit("sync", chart)
           }
         }
       }
