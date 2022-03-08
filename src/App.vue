@@ -11,7 +11,11 @@
         <Transition />
       </li>
     </ul>
-    <DashBoard class="dashBoard" />
+    <ul class="chart-list">
+      <li class="chart-list__item dashBoard">
+        <DashBoard />
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -66,5 +70,8 @@ export default {
 .transition {
   width: 65%;
   padding-left: 10px;
+}
+.dashBoard {
+  width: 50%;
 }
 </style>

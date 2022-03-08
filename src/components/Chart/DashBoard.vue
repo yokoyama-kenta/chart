@@ -1,37 +1,41 @@
 <template>
-  <div class="card">
-    処方箋枚数
-    <p>{{display.current.date}} (今週): {{display.current.count}}枚</p>
-    <p>{{display.last.date}} (先週): {{display.last.count}}枚</p>
-    <LineChart
-      v-if="isLoaded"
-      :chartData="{
-        datasets,
-        labels
-      }"
-      :options="options"
-    />
-  </div>
+  <article class="chart-item">
+    <p class="pl-1">処方箋枚数</p>
+    <div class="chart-wrapper">
+      <div>
+        <p>{{display.current.date}} (今週): {{display.current.count}}枚</p>
+        <p>{{display.last.date}} (先週): {{display.last.count}}枚</p>
+      </div>
+      <LineSyncChart
+        class="line-chart"
+        v-if="isLoaded"
+        :chartData="{
+          datasets,
+          labels
+        }"
+        :responseData="responseData"
+        :currentChartIndex="currentChartIndex"
+        :lastChartIndex="lastChartIndex"
+        @sync="sync"
+      />
+    </div>
+  </article>
 </template>
 
 <script>
   import axios from 'axios'
-  import LineChart from './Base/LineChart.vue'
-  import moment from 'moment'
-
-  // 現在グラフが0番目、過去グラフが1番目と決めうち
-  const currentChartIndex = 0
-  const lastChartIndex = 1
+  import LineSyncChart from './Base/LineSyncChart.vue'
+  import { addDays, parse, format } from "date-fns"
 
   export default {
     components: {
-      LineChart
+      LineSyncChart
     },
     data () {
       return {
+        responseData: null,
         datasets: [],
         labels: [],
-        options: {},
         display: {
           current: {
             date: null,
@@ -42,7 +46,10 @@
             count: 0
           },
         },
-        isLoaded: false
+        isLoaded: false,
+        // 現在グラフが0番目、過去グラフが1番目と決めうち
+        currentChartIndex: 0,
+        lastChartIndex: 1
       }
     },
     async mounted () {
@@ -53,106 +60,57 @@
     methods: {
       async getData () {
         // 月ごとにリクエスト
-        const chartData = await axios.get('/mock/chart/dashBoard.json')
+        this.responseData = await axios.get('/mock/chart/dashBoard.json')
           .then(response => {
             return response.data
           })
           .catch(error => console.log(error))
 
-        this.datasets = chartData.map((item, index) => {
+        this.datasets = this.responseData.map((item, index) => {
           return {
             label: item.name,
-            borderColor: index === currentChartIndex ? '#0EBAB6' : '#A4ACBA',
-            backgroundColor:"rgba(255,0,0,0)",
+            borderColor: index === this.currentChartIndex ? '#0EBAB6' : '#A4ACBA',
+            pointBackgroundColor: index === this.currentChartIndex ? '#0EBAB6' : '#A4ACBA',
+            backgroundColor: "transparent",
             data: item.count,
             lineTension: 0,
             borderWidth: 1.5,
             pointRadius: 0,
             pointStyle: '',
-            pointHitRadius: 100,
-            hoverRadius: 1.5,
-            hoverBorderWidth: 2
+            pointHitRadius: 0,
+            hoverRadius: 2, // 丸ポチのサイズ
           }
         })
 
-        this.labels = chartData[currentChartIndex].count.map((item, index) => {
-          return moment(chartData[currentChartIndex].start).add(index, 'days').format('YYYY-MM-DD')
+        this.labels = this.responseData[this.currentChartIndex].count.map((item, index) => {
+          return addDays(parse(this.responseData[this.currentChartIndex].start, "yyyy-MM-dd", new Date()), index)
         })
+      },
+      // ホバー時に同期したい処理
+      sync(item) {
+        // カウント数反映
+        const index = item[this.currentChartIndex]._index
+        this.display.current.count = this.responseData[this.currentChartIndex].count[index]
+        this.display.last.count = this.responseData[this.lastChartIndex].count[index]
 
-        this.options = {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            xAxes: [
-              {
-                gridLines: {
-                  display: false,
-                },
-                ticks: {
-                  beginAtZero: true,
-                  callback: (value, index, values) => {
-                    return index === currentChartIndex ? moment(value).format('MM/DD') : value === values[values.length - 1] ? '今日' : ''
-                  }
-                }
-              },
-            ],
-            yAxes: [
-              {
-                gridLines: {
-                  color: "transparent",
-                  zeroLineColor: "#E6E6E6",
-                  drawOnChartArea: false,
-                  drawTicks: false
-                },
-                ticks: {
-                  display: false,
-                  callback: (value, index, values) => {
-                    return value === values[values.length - 1] ? `${value}万円` : value.toLocaleString()
-                  }
-                }
-              },
-              {
-                gridLines: {
-                  color: "transparent",
-                  zeroLineColor: "#E6E6E6",
-                  drawTicks: false
-                },
-                ticks: {
-                  display: false
-                }
-              },
-            ]
-          },
-          legend: {
-            display: false
-          },
-          tooltips:{
-            enabled: false
-          },
-          hover: {
-            onHover: (evt, item) => {
-              if (item.length) {
-                // カウント数反映
-                const index = item[currentChartIndex]._index
-                this.display.current.count = chartData[currentChartIndex].count[index]
-                this.display.last.count = chartData[lastChartIndex].count[index]
-
-                // 日付反映
-                this.display.current.date = moment(chartData[currentChartIndex].start).add(index, 'days').format('YYYY-MM-DD')
-                this.display.last.date = moment(chartData[lastChartIndex].start).add(index, 'days').format('YYYY-MM-DD')
-
-              }
-            }
-          },
-        }
+        // 日付反映
+        this.display.current.date = format(addDays(parse(this.responseData[this.currentChartIndex].start, "yyyy-MM-dd", new Date()), index), "yyyy-MM-dd")
+        this.display.last.date = format(addDays(parse(this.responseData[this.lastChartIndex].start, "yyyy-MM-dd", new Date()), index), "yyyy-MM-dd")
       }
     }
   }
 </script>
 
-<style>
-.card {
-  width: 600px;
-  height: 400px;
+<style scoped>
+.chart-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+.line-chart {
+  flex-grow: 1;
+  /* height: 100%; */
+  position: relative;
+  z-index: 0;
+  background: #fff;
 }
 </style>

@@ -1,6 +1,7 @@
 <script>
 import { Line, mixins } from "vue-chartjs";
-import { format } from "date-fns"
+import { format } from "date-fns";
+
 const { reactiveProp } = mixins;
 
 export default {
@@ -8,8 +9,8 @@ export default {
   mixins: [reactiveProp],
   props: {
     responseData: {
-      type: Object,
-      default: () => {}
+      type: Array,
+      default: () => []
     },
     chartData: {
       type: Object,
@@ -18,6 +19,14 @@ export default {
     height: {
       type: Number,
       default: 220
+    },
+    currentChartIndex: {
+      type: Number,
+      default: 0
+    },
+    lastChartIndex: {
+      type: Number,
+      default: 1
     },
     options: {
       type: Object,
@@ -32,74 +41,52 @@ export default {
             xAxes: [
               {
                 gridLines: {
-                  color: "transparent",
-                  zeroLineColor: "transparent",
-                  drawTicks: false,
+                  display: false,
                 },
                 ticks: {
                   beginAtZero: true,
                   callback: (value, index, values) => {
-                    return index === 0 || value === values[values.length - 1]
-                      ? format(value, "yyyy/MM")
-                      : "";
-                  },
-                  padding: 15,
-                  maxRotation: 0,
-                  minRotation: 0,
-                  fontColor: "#848484"
-                },
+                    return index === this.currentChartIndex ? format(value, 'MM/dd') : value === values[values.length - 1] ? '今日' : ''
+                  }
+                }
               },
             ],
             yAxes: [
               {
                 gridLines: {
-                  color: "#E6E6E6",
+                  color: "transparent",
                   zeroLineColor: "#E6E6E6",
-                  drawTicks: false,
-                  drawBorder: false,
+                  drawOnChartArea: false,
+                  drawTicks: false
                 },
                 ticks: {
-                  beginAtZero: true,
+                  display: false,
                   callback: (value, index, values) => {
-                    return value === values[values.length - 1]
-                      ? `${value}万円`
-                      : value.toLocaleString();
-                  },
-                  padding: 30,
-                  stepSize: 40
-                },
+                    return value === values[values.length - 1] ? `${value}万円` : value.toLocaleString()
+                  }
+                }
               },
-            ],
-          },
-          legendCallback: function(chart) {
-            const template = []
-            chart.data.datasets.forEach((data, index) => {
-              template.push(`
-                <li>
-                  <span class="border" style="background-color: ${data.borderColor}"></span>
-                  <span>${index + 1}</span>
-                </li>
-              `)
-            });
-            return template.join("");
+              {
+                gridLines: {
+                  color: "transparent",
+                  zeroLineColor: "#E6E6E6",
+                  drawTicks: false
+                },
+                ticks: {
+                  display: false
+                }
+              },
+            ]
           },
           legend: {
-            display: false,
-            position: "right",
-            align: "end",
+            display: false
           },
-          tooltips: {
-            mode: "label", //マウスオーバー時に表示されるtooltip
+          tooltips:{
+            mode: "label",
+            enabled: false,
             intersect: false,
-            position: "nearest",
-            caretSize: 0,
-            callbacks: {
-              title: (tooltipItem) => {
-                return format(tooltipItem[0].xLabel, "yyyy年MM月");
-              },
-            },
           },
-          onHover: () => {
+          onHover: (evt, item) => {
             const init = () => {
               // 初回実行
               if (!this.border.canvas) {
@@ -118,8 +105,12 @@ export default {
 
             init()
             draw()
-          },
-        };
+
+            if (item.length) {
+              this.$emit("sync", item)
+            }
+          }
+        }
       }
     },
   },
