@@ -1,7 +1,8 @@
 <script>
 import { Line, mixins } from "vue-chartjs";
-import { format } from "date-fns"
+import { format } from "date-fns";
 const { reactiveProp } = mixins;
+import "chartjs-plugin-style";
 
 export default {
   extends: Line,
@@ -9,24 +10,24 @@ export default {
   props: {
     responseData: {
       type: Object,
-      default: () => {}
+      default: () => {},
     },
     chartData: {
       type: Object,
-      default: () => {}
+      default: () => {},
     },
     height: {
       type: Number,
-      default: 220
+      default: 220,
     },
     options: {
       type: Object,
-      default: function() {
+      default: function () {
         return {
           responsive: true,
           maintainAspectRatio: false,
           hover: {
-            animationDuration: 50
+            animationDuration: 50,
           },
           scales: {
             xAxes: [
@@ -46,7 +47,7 @@ export default {
                   padding: 15,
                   maxRotation: 0,
                   minRotation: 0,
-                  fontColor: "#848484"
+                  fontColor: "#848484",
                 },
               },
             ],
@@ -66,20 +67,22 @@ export default {
                       : value.toLocaleString();
                   },
                   padding: 30,
-                  stepSize: 40
+                  stepSize: 40,
                 },
               },
             ],
           },
-          legendCallback: function(chart) {
-            const template = []
+          legendCallback: function (chart) {
+            const template = [];
             chart.data.datasets.forEach((data, index) => {
               template.push(`
                 <li>
-                  <span class="border" style="background-color: ${data.borderColor}"></span>
+                  <span class="border" style="background-color: ${
+                    data.borderColor
+                  }"></span>
                   <span>${index + 1}</span>
                 </li>
-              `)
+              `);
             });
             return template.join("");
           },
@@ -93,6 +96,15 @@ export default {
             intersect: false,
             position: "nearest",
             caretSize: 0,
+            backgroundColor: "#FFF",
+            bodyFontColor: "#504946",
+            titleFontColor: "#504946",
+            borderColor: "#D8D8D8",
+            borderWidth: 1,
+            shadowOffsetX: 1,
+            shadowOffsetY: 1,
+            shadowBlur: 3,
+            shadowColor: "#15223226",
             callbacks: {
               title: (tooltipItem) => {
                 return format(tooltipItem[0].xLabel, "yyyy年MM月");
@@ -103,24 +115,24 @@ export default {
             const init = () => {
               // 初回実行
               if (!this.border.canvas) {
-                this.createCanvas()
+                this.createCanvas();
 
-                const chart = this.$data._chart
-                chart.canvas.addEventListener('mouseleave', this.onLeave)
+                const chart = this.$data._chart;
+                chart.canvas.addEventListener("mouseleave", this.onLeave);
 
-                this.onLeave()
+                this.onLeave();
               }
-            }
+            };
 
             const draw = () => {
-              this.onMove()
-            }
+              this.onMove();
+            };
 
-            init()
-            draw()
+            init();
+            draw();
           },
         };
-      }
+      },
     },
   },
   data() {
@@ -129,77 +141,76 @@ export default {
       border: {
         canvas: null,
         left: 0,
-        lastActive: []
-      }
+        lastActive: [],
+      },
     };
   },
   methods: {
     createCanvas() {
-      const chart = this.$data._chart
+      const chart = this.$data._chart;
 
       this.border.canvas = document.createElement("canvas");
-      this.border.canvas.width = chart.canvas.offsetWidth
-      this.border.canvas.height = chart.canvas.offsetHeight
-      this.border.canvas.style.position = 'absolute'
-      this.border.canvas.style.top = 0
-      this.border.canvas.style.left = 0
-      this.border.canvas.style.zIndex = -1
-      this.border.canvas.style.pointerEvents = 'none'
-      chart.canvas.parentNode.appendChild(this.border.canvas)
+      this.border.canvas.width = chart.canvas.offsetWidth;
+      this.border.canvas.height = chart.canvas.offsetHeight;
+      this.border.canvas.style.position = "absolute";
+      this.border.canvas.style.top = 0;
+      this.border.canvas.style.left = 0;
+      this.border.canvas.style.zIndex = -1;
+      this.border.canvas.style.pointerEvents = "none";
+      chart.canvas.parentNode.appendChild(this.border.canvas);
     },
     onLeave() {
-      const chart = this.$data._chart
-      this.border.lastActive.forEach(element => {
-        element._model.radius = 0
-      })
-      this.border.left = 0
+      const chart = this.$data._chart;
+      this.border.lastActive.forEach((element) => {
+        element._model.radius = 0;
+      });
+      this.border.left = 0;
 
       const ctx = this.border.canvas.getContext("2d");
-      ctx.clearRect(
-        0,
-        0,
-        chart.canvas.offsetWidth,
-        chart.canvas.offsetHeight
-      )
+      ctx.clearRect(0, 0, chart.canvas.offsetWidth, chart.canvas.offsetHeight);
 
-      this.border.lastActive = []
+      this.border.lastActive = [];
     },
     onMove() {
-      const chart = this.$data._chart
+      const chart = this.$data._chart;
       const ctx = this.border.canvas.getContext("2d");
-      const activeToolTip = chart.tooltip._active
+      const activeToolTip = chart.tooltip._active;
       if (activeToolTip && activeToolTip.length) {
-
         // ぼやけ対策で小数点切り捨て後に+0.5px
         const left = Math.floor(activeToolTip[0].tooltipPosition().x) + 0.5;
-        const top = chart.scales['y-axis-0'].top;
-        const bottom = chart.scales['y-axis-0'].bottom;
+        const top = chart.scales["y-axis-0"].top;
+        const bottom = chart.scales["y-axis-0"].bottom;
 
         if (left !== this.border.left) {
           activeToolTip.forEach((element, index) => {
-            const data = chart.data.datasets[index]
-            element._model.radius = data.hoverRadius
-          })
+            const data = chart.data.datasets[index];
+            element._model.radius = data.hoverRadius;
+          });
           this.border.lastActive.forEach((element) => {
-            element._model.radius = 0
-          })
+            element._model.radius = 0;
+          });
 
-          this.border.lastActive = activeToolTip
+          this.border.lastActive = activeToolTip;
 
-          ctx.clearRect(0, 0, chart.canvas.offsetWidth, chart.canvas.offsetHeight)
+          ctx.clearRect(
+            0,
+            0,
+            chart.canvas.offsetWidth,
+            chart.canvas.offsetHeight
+          );
           ctx.save();
           ctx.beginPath();
-          ctx.setLineDash([2, 2])
+          ctx.setLineDash([2, 2]);
           ctx.moveTo(left, top);
           ctx.lineTo(left, bottom);
           ctx.lineWidth = 0.5;
-          ctx.strokeStyle = '#8B99B2';
+          ctx.strokeStyle = "#8B99B2";
           ctx.stroke();
           ctx.restore();
         }
-        this.border.left = left
+        this.border.left = left;
       }
-    }
+    },
   },
   beforeDestroy() {
     const chart = this.$data._chart;
@@ -207,11 +218,11 @@ export default {
       chart.canvas.removeEventListener("mouseleave", this.onLeave);
     }
   },
-  mounted () {
+  mounted() {
     this.renderChart(this.chartData, this.options);
 
     const legend = this.generateLegend();
-    this.$emit('sendLegend', legend);
-  }
-}
+    this.$emit("sendLegend", legend);
+  },
+};
 </script>
