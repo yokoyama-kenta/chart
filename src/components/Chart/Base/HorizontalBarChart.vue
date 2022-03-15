@@ -79,7 +79,7 @@ export default {
           tooltips: {
             mode: "label", //マウスオーバー時に表示されるtooltip
             intersect: false,
-            // position: "nearest",
+            position: "nearest",
             caretSize: 0,
             backgroundColor: "#FFF",
             bodyFontColor: "#504946",
