@@ -12,7 +12,7 @@
         :responseData="responseData"
         @sendLegend="setLegend"
       />
-      <ul class="legend" v-html="chartLegend"></ul>
+      <div class="legend" v-html="chartLegend"></div>
     </div>
   </article>
 </template>
@@ -87,7 +87,7 @@ export default {
   z-index: 0;
   background: #fff;
 }
-.legend {
+.legend ::v-deep ul {
   width: 100px;
   list-style: none;
   display: flex;

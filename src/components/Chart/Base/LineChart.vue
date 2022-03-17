@@ -19,120 +19,7 @@ export default {
     height: {
       type: Number,
       default: 220,
-    },
-    options: {
-      type: Object,
-      default: function () {
-        return {
-          responsive: true,
-          maintainAspectRatio: false,
-          hover: {
-            animationDuration: 50,
-          },
-          scales: {
-            xAxes: [
-              {
-                gridLines: {
-                  color: "transparent",
-                  zeroLineColor: "transparent",
-                  drawTicks: false,
-                },
-                ticks: {
-                  beginAtZero: true,
-                  callback: (value, index, values) => {
-                    return index === 0 || value === values[values.length - 1]
-                      ? format(value, "yyyy/MM")
-                      : "";
-                  },
-                  padding: 15,
-                  maxRotation: 0,
-                  minRotation: 0,
-                  fontColor: "#848484",
-                },
-              },
-            ],
-            yAxes: [
-              {
-                gridLines: {
-                  color: "#E6E6E6",
-                  zeroLineColor: "#E6E6E6",
-                  drawTicks: false,
-                  drawBorder: false,
-                },
-                ticks: {
-                  beginAtZero: true,
-                  callback: (value, index, values) => {
-                    return value === values[values.length - 1]
-                      ? `${value}万円`
-                      : value.toLocaleString();
-                  },
-                  padding: 30,
-                  stepSize: 40,
-                },
-              },
-            ],
-          },
-          legendCallback: function (chart) {
-            const template = [];
-            chart.data.datasets.forEach((data, index) => {
-              template.push(`
-                <li>
-                  <span class="border" style="background-color: ${
-                    data.borderColor
-                  }"></span>
-                  <span>${index + 1}</span>
-                </li>
-              `);
-            });
-            return template.join("");
-          },
-          legend: {
-            display: false,
-            position: "right",
-            align: "end",
-          },
-          tooltips: {
-            mode: "label", //マウスオーバー時に表示されるtooltip
-            intersect: false,
-            caretSize: 0,
-            backgroundColor: "#FFF",
-            bodyFontColor: "#504946",
-            titleFontColor: "#504946",
-            borderColor: "#D8D8D8",
-            borderWidth: 1,
-            shadowOffsetX: 1,
-            shadowOffsetY: 1,
-            shadowBlur: 3,
-            shadowColor: "#15223226",
-            callbacks: {
-              title: (tooltipItem) => {
-                return format(tooltipItem[0].xLabel, "yyyy年MM月");
-              },
-            },
-          },
-          onHover: () => {
-            const init = () => {
-              // 初回実行
-              if (!this.border.canvas) {
-                this.createCanvas();
-
-                const chart = this.$data._chart;
-                chart.canvas.addEventListener("mouseleave", this.onLeave);
-
-                this.onLeave();
-              }
-            };
-
-            const draw = () => {
-              this.onMove();
-            };
-
-            init();
-            draw();
-          },
-        };
-      },
-    },
+    }
   },
   data() {
     return {
@@ -142,7 +29,140 @@ export default {
         left: 0,
         lastActive: [],
       },
+      currentIndex: null
     };
+  },
+  computed: {
+    options() {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        hover: {
+          animationDuration: 50,
+        },
+        scales: {
+          xAxes: [
+            {
+              gridLines: {
+                color: "transparent",
+                zeroLineColor: "transparent",
+                drawTicks: false,
+              },
+              ticks: {
+                beginAtZero: true,
+                callback: (value, index, values) => {
+                  return index === 0 || value === values[values.length - 1]
+                    ? format(value, "yyyy/MM")
+                    : "";
+                },
+                padding: 15,
+                maxRotation: 0,
+                minRotation: 0,
+                fontColor: "#848484",
+              },
+            },
+          ],
+          yAxes: [
+            {
+              gridLines: {
+                color: "#E6E6E6",
+                zeroLineColor: "#E6E6E6",
+                drawTicks: false,
+                drawBorder: false,
+              },
+              ticks: {
+                beginAtZero: true,
+                callback: (value, index, values) => {
+                  return value === values[values.length - 1]
+                    ? `${value}万円`
+                    : value.toLocaleString();
+                },
+                padding: 30,
+                stepSize: 40,
+              },
+            },
+          ],
+        },
+        legendCallback: (chart) => {
+          const template = [];
+          const total = chart.data.datasets.map(element => {
+            return element.data.reduce((sum, data) => {
+              return sum + data;
+            }, 0)
+          });
+
+          template.push(`
+            <div class="label">
+              <span>${this.currentIndex === null
+                ? format(chart.data.labels[0], "yyyy/MM") + '~' + format(chart.data.labels[chart.data.labels.length - 1], "yyyy/MM")
+                : format(chart.data.labels[this.currentIndex], "yyyy/MM")}
+              </span>
+              <ul>
+          `)
+          chart.data.datasets.forEach((data, index) => {
+            template.push(`
+              <li>
+                <span class="border" style="background-color: ${
+                  data.borderColor
+                }"></span>
+                <span>${index + 1}: </span>
+                <span>${this.currentIndex === null ? total[index] : data.data[this.currentIndex]}</span>
+              </li>
+            `);
+          });
+          template.push(`
+              </ul>
+            </div>
+          `)
+          return template.join("");
+        },
+        legend: {
+          display: false,
+          position: "right",
+          align: "end",
+        },
+        tooltips: {
+          mode: "label", //マウスオーバー時に表示されるtooltip
+          intersect: false,
+          enabled: false,
+          caretSize: 0,
+          backgroundColor: "#FFF",
+          bodyFontColor: "#504946",
+          titleFontColor: "#504946",
+          borderColor: "#D8D8D8",
+          borderWidth: 1,
+          shadowOffsetX: 1,
+          shadowOffsetY: 1,
+          shadowBlur: 3,
+          shadowColor: "#15223226",
+          callbacks: {
+            title: (tooltipItem) => {
+              return format(tooltipItem[0].xLabel, "yyyy年MM月");
+            },
+          },
+        },
+        onHover: () => {
+          const init = () => {
+            // 初回実行
+            if (!this.border.canvas) {
+              this.createCanvas();
+
+              const chart = this.$data._chart;
+              chart.canvas.addEventListener("mouseleave", this.onLeave);
+
+              this.onLeave();
+            }
+          };
+
+          const draw = () => {
+            this.onMove();
+          };
+
+          init();
+          draw();
+        },
+      };
+    }
   },
   methods: {
     createCanvas() {
@@ -169,6 +189,7 @@ export default {
       ctx.clearRect(0, 0, chart.canvas.offsetWidth, chart.canvas.offsetHeight);
 
       this.border.lastActive = [];
+      this.currentIndex = null
     },
     onMove() {
       const chart = this.$data._chart;
@@ -206,6 +227,8 @@ export default {
           ctx.strokeStyle = "#8B99B2";
           ctx.stroke();
           ctx.restore();
+
+          this.currentIndex = activeToolTip[0]._index
         }
         this.border.left = left;
       }
@@ -223,5 +246,11 @@ export default {
     const legend = this.generateLegend();
     this.$emit("sendLegend", legend);
   },
+  watch: {
+    currentIndex() {
+      const legend = this.generateLegend();
+      this.$emit("sendLegend", legend);
+    }
+  }
 };
 </script>
